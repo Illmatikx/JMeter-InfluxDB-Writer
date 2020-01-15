@@ -76,7 +76,7 @@ public interface RequestMeasurement {
 
 		String PROCESSING_TIME = "processingTime";
 
-		String PROCESSING_TIME_TTFB = "processingTime";
+		String PROCESSING_TIME_TTFB = "processingTimeTTFB";
 		
 		
 	}
