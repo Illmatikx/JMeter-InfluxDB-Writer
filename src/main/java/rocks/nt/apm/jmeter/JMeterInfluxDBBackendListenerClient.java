@@ -146,6 +146,7 @@ public class JMeterInfluxDBBackendListenerClient extends AbstractBackendListener
 						.addField(RequestMeasurement.Fields.CONNECT_TIME, sampleResult.getConnectTime())
 						.addField(RequestMeasurement.Fields.DOWNLOAD_TIME, (sampleResult.getTime() - sampleResult.getLatency()))
 						.addField(RequestMeasurement.Fields.PROCESSING_TIME, (sampleResult.getTime() - sampleResult.getConnectTime()))
+						.addField(RequestMeasurement.Fields.PROCESSING_TIME_TTFB, (sampleResult.getLatency() - sampleResult.getConnectTime()))
 						.addField(RequestMeasurement.Fields.RESPONSE_TIME, sampleResult.getTime()).build();
 				influxDB.write(influxDBConfig.getInfluxDatabase(), influxDBConfig.getInfluxRetentionPolicy(), point);
 			}
