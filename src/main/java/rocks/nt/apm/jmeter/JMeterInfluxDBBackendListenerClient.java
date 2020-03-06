@@ -9,11 +9,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.jmeter.threads.JMeterContext;
-import org.apache.jmeter.threads.AbstractThreadGroup;
-import org.apache.jmeter.testelement.AbstractTestElement;
-import org.apache.jmeter.util.JMeterUtils;
-
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.samplers.SampleResult;
 import org.apache.jmeter.threads.JMeterContextService;
@@ -136,9 +131,9 @@ public class JMeterInfluxDBBackendListenerClient extends AbstractBackendListener
 				Point point = Point.measurement(RequestMeasurement.MEASUREMENT_NAME).time(
 						System.currentTimeMillis() * ONE_MS_IN_NANOSECONDS + getUniqueNumberForTheSamplerThread(), TimeUnit.NANOSECONDS)
 						.tag(RequestMeasurement.Tags.REQUEST_NAME, sampleResult.getSampleLabel())
-						.tag(RequestMeasurement.Tags.RESPONSE_CODE, sampleResult.getResponseCode())
-                        .addField(RequestMeasurement.Fields.ERROR_COUNT, sampleResult.getErrorCount())
+                                                .addField(RequestMeasurement.Fields.ERROR_COUNT, sampleResult.getErrorCount())
 						.addField(RequestMeasurement.Fields.THREAD_NAME, sampleResult.getThreadName())
+						.tag(RequestMeasurement.Tags.RESPONSE_CODE, defaultResponseCode(sampleResult.getResponseCode()))
 						.tag(RequestMeasurement.Tags.TEST_NAME, component)
 						.tag(RequestMeasurement.Tags.NODE_NAME, env)
 						.addField(RequestMeasurement.Fields.RESPONSE_BYTES, sampleResult.getBytesAsLong())
@@ -151,6 +146,13 @@ public class JMeterInfluxDBBackendListenerClient extends AbstractBackendListener
 				influxDB.write(influxDBConfig.getInfluxDatabase(), influxDBConfig.getInfluxRetentionPolicy(), point);
 			}
 		}
+	}
+
+	private String defaultResponseCode(String responseCode) {
+		if (responseCode == null || responseCode.isEmpty()){
+			return "000";
+		}
+		return responseCode;
 	}
 
 	@Override
@@ -231,7 +233,6 @@ public class JMeterInfluxDBBackendListenerClient extends AbstractBackendListener
 		try {
 			ThreadCounts tc = JMeterContextService.getThreadCounts();
 			addVirtualUsersMetrics(getUserMetrics().getMinActiveThreads(), getUserMetrics().getMeanActiveThreads(), getUserMetrics().getMaxActiveThreads(), tc.startedThreads, tc.finishedThreads);
-
 		} catch (Exception e) {
 			LOGGER.error("Failed writing to influx", e);
 		}
